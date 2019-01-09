@@ -59,39 +59,50 @@ public class ContactService {
 	}
 
 	@Transactional
-	public Contact updateApplicationUserContact(Contact contact, String username) {
+	public Contact updateApplicationUserContact(Contact newContact, UUID id, String username) {
 
-		if (contact.getId() == null)
-			throw new IllegalArgumentException("Can't update entity without id");
-
+		Optional<Contact> currentContactOptional = this.contactRepository.findById(id);
+		
+		if(!currentContactOptional.isPresent())
+			throw new IllegalArgumentException("Resource does not exist");
+		
+		Contact currentContact = currentContactOptional.get();
+		
 		ApplicationUser user = applicationUserRepository.findFirstByUsername(username);
-
-		Optional<Contact> toBeUpdated = this.contactRepository.findById(contact.getId());
-
-		if (user.getId() != toBeUpdated.get().getApplicationUser().getId()) {
+	
+		if (user.getId() != currentContact.getApplicationUser().getId()) {
 			throw new AccessDeniedException("Cannot change other's users data");
+		}		
+		
+		currentContact.setFirstName(newContact.getFirstName());
+		currentContact.setLastName(newContact.getLastName());
+		currentContact.setBornDate(newContact.getBornDate());
+		currentContact.setEmail(newContact.getEmail());
+		currentContact.setPhone(newContact.getPhone());
+		currentContact.setCpf(newContact.getCpf());
+		
+		newContact.setApplicationUser(user);
+		
+		for (Address address : newContact.getAddresses()) {
+			address.setContact(currentContact);
 		}
 
-		contact.setApplicationUser(user);
+		currentContact.setAddresses(newContact.getAddresses());
+		
+		currentContact = this.contactRepository.save(currentContact);
 
-		for (Address address : contact.getAddresses()) {
-			address.setContact(contact);
-		}
+		Contact recentlyUpdatedContact = this.contactRepository.findById(currentContact.getId()).get();
 
-		contact = this.contactRepository.save(contact);
-
-		Optional<Contact> recentlyUpdatedContact = this.contactRepository.findById(contact.getId());
-
-		return recentlyUpdatedContact.get();
+		return recentlyUpdatedContact;
 
 	}
 
 	@Transactional
-	public void delete(Contact contact, String username) {
+	public void delete(UUID id, String username) {
 
 		ApplicationUser user = applicationUserRepository.findFirstByUsername(username);
 
-		Contact toBeDeleted = this.contactRepository.getOne(contact.getId());
+		Contact toBeDeleted = this.contactRepository.getOne(id);
 
 		if (user.getId() != toBeDeleted.getApplicationUser().getId()) {
 			throw new AccessDeniedException("Cannot change other's users data");

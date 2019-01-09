@@ -19,7 +19,10 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.Length;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -29,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @Entity
 @NamedQuery(name = "Contact.findAll", query = "SELECT c FROM Contact c")
-@NamedQuery(name = "Contact.findByUsername", query = "SELECT c FROM Contact c JOIN c.applicationUser au where au.username=:username")
+@NamedQuery(name = "Contact.findByUsername", query = "SELECT c FROM Contact c JOIN c.applicationUser au where au.username=:username order by c.firstName, c.lastName")
 public class Contact implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -39,9 +42,11 @@ public class Contact implements Serializable {
 
 	@Temporal(TemporalType.DATE)
 	@Column(name = "born_date")
+	@NotNull
 	private Date bornDate;
 
 	@NotNull
+	@Length(max = 11, min = 11)
 	private String cpf;
 
 	@Column(name = "first_name")
@@ -52,8 +57,15 @@ public class Contact implements Serializable {
 	@NotNull
 	private String lastName;
 
+	@Email
+	private String email;
+	
+	@NotNull
+	@Length(max = 11, min = 11)
+	private String phone;
+
 	// bi-directional many-to-one association to Address
-	@OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Address> addresses = new ArrayList<>();
 
 	// bi-directional many-to-one association to User
@@ -65,14 +77,34 @@ public class Contact implements Serializable {
 	public Contact() {
 	}
 
-	public Contact(Date bornDate, @NotNull String cpf, @NotNull String firstName, @NotNull String lastName,
-			List<Address> addresses, @NotNull ApplicationUser applicationUser) {
+	public Contact(@NotNull Date bornDate, @NotNull @Length(max = 11, min = 11) String cpf, @NotNull String firstName,
+			@NotNull String lastName, @Email String email, String phone, List<Address> addresses,
+			ApplicationUser applicationUser) {
+		super();
 		this.bornDate = bornDate;
 		this.cpf = cpf;
 		this.firstName = firstName;
 		this.lastName = lastName;
+		this.email = email;
+		this.phone = phone;
 		this.addresses = addresses;
 		this.applicationUser = applicationUser;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public UUID getId() {
@@ -116,7 +148,9 @@ public class Contact implements Serializable {
 	}
 
 	public void setAddresses(List<Address> addresses) {
-		this.addresses = addresses;
+		this.addresses.clear();
+		if (addresses != null)
+			this.addresses.addAll(addresses);
 	}
 
 	public Address addAddress(Address address) {

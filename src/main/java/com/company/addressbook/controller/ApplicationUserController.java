@@ -1,6 +1,7 @@
 package com.company.addressbook.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.validation.Valid;
 
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,19 +53,19 @@ public class ApplicationUserController {
 		return new ResponseEntity<Contact>(createdContact, HttpStatus.CREATED);
 	}
 
-	@PutMapping("/current/contacts")
+	@PutMapping("/current/contacts/{id}")
 	@ResponseBody
-	public ResponseEntity<Contact> updateUserContact(@RequestBody @Valid Contact contact,
+	public ResponseEntity<Contact> updateUserContact(@PathVariable UUID id, @RequestBody @Valid Contact contact,
 			Authentication authentication) {
-		Contact createdContact = contactService.updateApplicationUserContact(contact, authentication.getName());
+		Contact createdContact = contactService.updateApplicationUserContact(contact, id, authentication.getName());
 		return new ResponseEntity<Contact>(createdContact, HttpStatus.OK);
 	}
 
-	@DeleteMapping("/current/contacts/")
+	@DeleteMapping("/current/contacts/{id}")
 	@ResponseBody
-	public ResponseEntity<Object> deleteUserContact(@RequestBody @Valid Contact contact,
+	public ResponseEntity<Object> deleteUserContact(@PathVariable UUID id,
 			Authentication authentication) {
-		this.contactService.delete(contact, authentication.getName());
+		this.contactService.delete(id, authentication.getName());
 		return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 	}
 

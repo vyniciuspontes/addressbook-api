@@ -38,8 +38,10 @@ public class Address implements Serializable {
 	@NotNull
 	private String postalCode;
 
+	@NotNull
 	private String city;
 
+	@NotNull
 	private String state;
 
 	@Column(name = "public_place")
