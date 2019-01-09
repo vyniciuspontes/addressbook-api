@@ -23,6 +23,13 @@ public class ApplicationUserService implements UserDetailsService {
 
 	@Transactional
 	public ApplicationUser save(ApplicationUser applicationUser) {
+		
+		ApplicationUser currentUser = this.applicationUserRepository.findFirstByUsername(applicationUser.getUsername());
+		
+		if(currentUser != null) {
+			throw new IllegalArgumentException("User already exists with this username: " + applicationUser.getUsername());
+		}
+		
 		return this.applicationUserRepository.saveAndFlush(applicationUser);
 	}
 

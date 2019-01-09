@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,7 +26,6 @@ import com.company.addressbook.service.ApplicationUserService;
 import com.company.addressbook.service.ContactService;
 
 @RestController
-@RequestMapping("/api/users")
 public class ApplicationUserController {
 
 	@Autowired
@@ -39,13 +37,13 @@ public class ApplicationUserController {
 	@Autowired
 	private ContactService contactService;
 
-	@PostMapping("/sign-up")
+	@PostMapping("/signup")
 	public void signUp(@RequestBody ApplicationUser user) {
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		applicationUserService.save(user);
 	}
 
-	@PostMapping("/current/contacts")
+	@PostMapping("api/users/current/contacts")
 	@ResponseBody
 	public ResponseEntity<Contact> createUserContact(@RequestBody @Valid Contact contact,
 			Authentication authentication) {
@@ -53,7 +51,7 @@ public class ApplicationUserController {
 		return new ResponseEntity<Contact>(createdContact, HttpStatus.CREATED);
 	}
 
-	@PutMapping("/current/contacts/{id}")
+	@PutMapping("api/users/current/contacts/{id}")
 	@ResponseBody
 	public ResponseEntity<Contact> updateUserContact(@PathVariable UUID id, @RequestBody @Valid Contact contact,
 			Authentication authentication) {
@@ -61,7 +59,7 @@ public class ApplicationUserController {
 		return new ResponseEntity<Contact>(createdContact, HttpStatus.OK);
 	}
 
-	@DeleteMapping("/current/contacts/{id}")
+	@DeleteMapping("api/users/current/contacts/{id}")
 	@ResponseBody
 	public ResponseEntity<Object> deleteUserContact(@PathVariable UUID id,
 			Authentication authentication) {
@@ -69,14 +67,14 @@ public class ApplicationUserController {
 		return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 	}
 
-	@GetMapping("/current/contacts")
+	@GetMapping("api/users/current/contacts")
 	@ResponseBody
 	public List<Contact> getUserContacts(Authentication authentication) {
 
 		return contactService.findByUsername(authentication.getName());
 	}
 
-	@GetMapping("/current")
+	@GetMapping("api/users/current")
 	public UserDetails getCurrent(Authentication authentication) {
 		return applicationUserService.loadUserByUsername(authentication.getName());
 	}

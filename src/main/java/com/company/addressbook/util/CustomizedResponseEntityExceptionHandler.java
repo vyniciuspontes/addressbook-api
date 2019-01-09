@@ -16,17 +16,25 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestController
 public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
+	@Override
+	  protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+	      HttpHeaders headers, HttpStatus status, WebRequest request) {
+	    ErrorDetails errorDetails = new ErrorDetails(new Date(), "Validation Failed",
+	        ex.getBindingResult().toString());
+	    return new ResponseEntity<Object>(errorDetails, HttpStatus.BAD_REQUEST);
+	  } 
+	
+	@ExceptionHandler(Exception.class)
+	public final ResponseEntity<ErrorDetails> handleAllExceptions(Exception ex, WebRequest request) {
+		ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
+		return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
 	@ExceptionHandler(IllegalArgumentException.class)
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(IllegalArgumentException ex, HttpHeaders headers,
-			HttpStatus status, WebRequest request) {
-		ErrorDetails errorDetails = new ErrorDetails(new Date(), "Illegal Argument", ex.toString());
-		return new ResponseEntity<Object>(errorDetails, HttpStatus.BAD_REQUEST);
+	public final ResponseEntity<ErrorDetails> handleUserNotFoundException(IllegalArgumentException ex,
+			WebRequest request) {
+		ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
+		return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
 	}
 
-	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		ErrorDetails errorDetails = new ErrorDetails(new Date(), "Validation Failed", ex.getBindingResult().toString());
-		return new ResponseEntity<Object>(errorDetails, HttpStatus.BAD_REQUEST);
-	}
 }
