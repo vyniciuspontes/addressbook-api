@@ -1,8 +1,8 @@
 package com.company.addressbook.model;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,8 +17,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
@@ -40,10 +38,10 @@ public class Contact implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
 
-	@Temporal(TemporalType.DATE)
+	//@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "born_date")
 	@NotNull
-	private Date bornDate;
+	private LocalDate bornDate;
 
 	@NotNull
 	@Length(max = 11, min = 11)
@@ -77,7 +75,7 @@ public class Contact implements Serializable {
 	public Contact() {
 	}
 
-	public Contact(@NotNull Date bornDate, @NotNull @Length(max = 11, min = 11) String cpf, @NotNull String firstName,
+	public Contact(@NotNull LocalDate bornDate, @NotNull @Length(max = 11, min = 11) String cpf, @NotNull String firstName,
 			@NotNull String lastName, @Email String email, String phone, List<Address> addresses,
 			ApplicationUser applicationUser) {
 		super();
@@ -111,11 +109,11 @@ public class Contact implements Serializable {
 		return this.id;
 	}
 
-	public Date getBornDate() {
+	public LocalDate getBornDate() {
 		return this.bornDate;
 	}
 
-	public void setBornDate(Date bornDate) {
+	public void setBornDate(LocalDate bornDate) {
 		this.bornDate = bornDate;
 	}
 
